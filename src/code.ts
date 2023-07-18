@@ -1,6 +1,7 @@
 const courseSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
 const scripting_docs = courseSpreadsheet.getSheetByName('scripting_docs');
 const lessonDetailsTab = courseSpreadsheet.getSheetByName('lesson_details');
+const promptDetailsTab = courseSpreadsheet.getSheetByName('prompt_details');
 
 function onOpen() {
     var ui = SpreadsheetApp.getUi();

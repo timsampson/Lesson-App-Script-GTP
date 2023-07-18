@@ -1,10 +1,32 @@
+type PromptDetailsObj = {
+    modelEndpoint: string,
+    promptRole: string,
+    promptDetails: string,
+    promptFormat: string,
+    promptStructure: string
+}
+
+async function getPromptObjDetails(): Promise<PromptDetailsObj> {
+    let promptDetailsValues: Array<Array<string>> = promptDetailsTab.getDataRange().getValues();
+    // Remove the first row (header) from the data
+    promptDetailsValues.shift();
+    // Create the promptDetailsObj object
+    let promptDetailsObj: Partial<PromptDetailsObj> = promptDetailsValues.reduce((obj, row) => {
+        obj[row[0] as keyof PromptDetailsObj] = row[1];
+        return obj;
+    }, {} as Partial<PromptDetailsObj>);
+    Logger.log(promptDetailsObj.promptStructure);
+    return promptDetailsObj as PromptDetailsObj;
+}
+
+
 async function processLessonPlans() {
     let lessonPlans = getLessonDetailsFromTab();
 
     for (let i = 0; i < lessonPlans.length; i++) {
         const lessonPlan = lessonPlans[i];
         Logger.log(lessonPlan.Summary);
-        createLessonPlan(lessonPlan.Summary);
+        await createLessonPlan(lessonPlan.Summary);
         Logger.log(`Lesson Plan ${lessonPlan.id} rowID: 'Processed', lessonDetailsTab: cellValue: true  `);
         updateCompleted(lessonPlan.id, 'Processed', lessonDetailsTab, true);
 
@@ -14,33 +36,13 @@ async function processLessonPlans() {
     }
 }
 
-function createLessonPlan(lessonPlanSummary: string) {
-    let modelEndpoint = 'https://api.openai.com/v1/chat/completions';
-    let promptRole = `
-    You are an experienced AP Computer Science A Java Teacher.
-    You have expert knowledge regarding Bloom’s taxonomy and the Danielson framework.
-    You create engaging lessons based primarily on content from the following curricular resources: CSAwesome, and the College Boards Computer Science A COURSE AND EXAM DESCRIPTION.
-    You write AP style questions and assessments in the T.E.E.L writing format`;
-    let promptDetails = `
-    The 45 minute Lesson Activity Plan Structure is as follows and is in the format - title: description
-    Main Topic: The main topic of the lesson. Include unit and sub-unit numbers if provided.
-    Introduction: Briefly Introduce the main topic from the CSA Lesson as well as the other activities for the day, CSAwesome Readings and Practice as well as the AP Classroom's Big Idea Quiz if any. Be clear and concise.
-    Learning Objectives:  Two learning objectives aligned to the Lesson with the following characteristics,  must use higher order thinking skills from Bloom’s Taxonomy, and match one or more of the following options, apply, analyze, evaluate, or create.
-    Warm Up: An interesting warm up about the topic of the day and any relevance to the previous topic. Additionally give some learning strategy advice that is relevant to the lesson.
-    Key Terms and Definitions: Three or more Key Term and definition pairs from the Lesson's main topic delimited by the character ' | '. in the Format of Term : Definition.
-    Essential Question: Must be one or two of the following options, open-ended, challenging, relevant to the students' lives, broad enough to generate discussion.
-    True or False Question: Must assess the major topic and objective of the lesson.
-    End of Lesson AP Classroom Big Idea Quiz : Quiz Title and also a summary  of the topic based on details from the APCSA Course and Exam Description.
-    Next Lesson Preview: A next lesson preview based on the next lesson topic.
-    Answer Key for Essential Question: Must be written in T.E.E.L writing format.   
-    Answer Key for True / False Question: Must be written step by step in T.E.E.L writing format. 
-    Completion Checklist:  A comprehensive list of required activities, assignments and questions delimited by the character ' | '  .`;
-    let promptFormat = `
-    Response Format: JSON,
-    JSON Keys: Unit, Title, Period, Main Topic, Introduction, Learning Objective 1, Learning Objective 2, Warm Up, Key Terms and Definitions, Essential Question, True or False Question, End of Lesson AP Classroom Big Idea Quiz, Next Lesson Preview, Answer Key for Essential Question, Answer Key for True or False Question, Completion Checklist. 
-    `;
-    let promptStructure = `
-    Must always use ' | ' as the separators.`;
+async function createLessonPlan(lessonPlanSummary: string) {
+    let promptObjDetails = await getPromptObjDetails();
+    let modelEndpoint = promptObjDetails.modelEndpoint;
+    let promptRole = promptObjDetails.promptRole;
+    let promptDetails = promptObjDetails.promptDetails;
+    let promptFormat = promptObjDetails.promptFormat;
+    let promptStructure = promptObjDetails.promptStructure;
     let payload = {
         "model": "gpt-3.5-turbo-16k",
         "messages": [
@@ -144,4 +146,3 @@ type lesson_details_tab = {
     Summary: string,
     Processed: string
 }
-
