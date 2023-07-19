@@ -18,4 +18,8 @@ prompt_details: The default content is used in the example.  It can be manually 
 
 [Project Description Slide](https://docs.google.com/spreadsheets/d/1sajQ_lnGGOGlY9mBU11gvDbGgm56oClHZr45mptgNf4/edit#gid=1206459728)
 
+### You can use the prompt_details tab to make changes for your use case.
+
+<img src="https://raw.githubusercontent.com/timsampson/lesson_plan_Appsscript_gpt3/main/docs/prompt_values.png" width="640">
+
 [![clasp](https://img.shields.io/badge/built%20with-clasp-4285f4.svg)](https://github.com/google/clasp)
