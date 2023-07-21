@@ -110,7 +110,7 @@ function writeJSONToSheet(data) {
     row.push(json['End of Lesson AP Classroom Big Idea Quiz']);
     row.push(json['Next Lesson Preview']);
     row.push(json['Answer Key for Essential Question']);
-    row.push(json['Answer Key for True / False Question']);
+    row.push(json['Answer Key for True or False Question']);
     row.push(json['Completion Checklist']);
 
     writeLessonPlanResultsTab.appendRow(row);
