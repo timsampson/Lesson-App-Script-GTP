@@ -82,7 +82,7 @@ async function createLessonPlan(lessonPlanSummary: string) {
     Logger.log(data['choices'][0]['message']['content']);
     writeJSONToSheet(data['choices'][0]['message']['content']);
 }
-function writeJSONToSheet(data) {
+function writeJSONToSheet(data: string) {
 
     let tabName = 'scripting_docs';
 
