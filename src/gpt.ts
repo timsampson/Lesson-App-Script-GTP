@@ -44,7 +44,7 @@ async function createLessonPlan(lessonPlanSummary: string) {
     let promptFormat = promptObjDetails.promptFormat;
     let promptStructure = promptObjDetails.promptStructure;
     let payload = {
-        "model": "gpt-3.5-turbo-16k",
+        "model": "gpt-4",
         "messages": [
             {
                 "role": "system", "content": promptRole
