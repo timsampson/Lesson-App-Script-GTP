@@ -12,14 +12,14 @@ lesson_details: The content in this tab is read by Apps Script to provide input 
 
 scripting_docs: The content in this tab was returned by GPT and written by Appscript. The Youtube details need to be manually added.
 
-prompt_details: The default content is used in the example.  It can be manually updated and is read by Apps Script to be used in the GTP API call.
+prompt_details: The default content is used in the example. It can be manually updated and is read by Apps Script to be used in the GTP API call.
 
 [AP CSA Slides and Worksheet Automation](https://docs.google.com/presentation/d/e/2PACX-1vRYrz5f0cYkBOBVnPZv9dzlP8P0LfqJjdjEPF8dAR-C245YmOKjqVwJMFI2fB3KLfZBaleBi6NWhnrc/pub?start=true&loop=true&delayms=3000)
 
 [Project Description Slide](https://docs.google.com/spreadsheets/d/1sajQ_lnGGOGlY9mBU11gvDbGgm56oClHZr45mptgNf4/edit#gid=1206459728)
 
-### You can use the prompt_details tab to make changes for your use case.
+### You can use the prompt_details tab to make changes for your use case
 
-<img src="https://raw.githubusercontent.com/timsampson/lesson_plan_Appsscript_gpt3/main/docs/prompt_values.png" width="640">
+![Prompt Values](https://raw.githubusercontent.com/timsampson/lesson_plan_Appsscript_gpt3/main/docs/prompt_values.png){width=640}
 
 [![clasp](https://img.shields.io/badge/built%20with-clasp-4285f4.svg)](https://github.com/google/clasp)

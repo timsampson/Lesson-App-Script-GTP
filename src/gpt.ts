@@ -72,7 +72,7 @@ async function createLessonPlan(lessonPlanSummary: string) {
         'Authorization': 'Bearer ' + apiKey,
         'Content-Type': 'application/json'
     };
-    let options = {
+    let options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
         method: 'post',
         headers: headers,
         payload: JSON.stringify(payload)
