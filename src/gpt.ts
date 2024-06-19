@@ -6,8 +6,8 @@ type PromptDetailsObj = {
     promptStructure: string
 }
 
-async function getPromptObjDetails(): Promise<PromptDetailsObj> {
-    let promptDetailsValues: Array<Array<string>> = promptDetailsTab.getDataRange().getValues();
+function getPromptObjDetails(): PromptDetailsObj {
+    let promptDetailsValues: Array<Array<string>> = SHEETSDB.promptDetails.getDataRange().getValues();
     // Remove the first row (header) from the data
     promptDetailsValues.shift();
     // Create the promptDetailsObj object
@@ -15,7 +15,6 @@ async function getPromptObjDetails(): Promise<PromptDetailsObj> {
         obj[row[0] as keyof PromptDetailsObj] = row[1];
         return obj;
     }, {} as Partial<PromptDetailsObj>);
-    Logger.log(promptDetailsObj.promptStructure);
     return promptDetailsObj as PromptDetailsObj;
 }
 
@@ -28,7 +27,7 @@ async function processLessonPlans() {
         Logger.log(lessonPlan.Summary);
         await createLessonPlan(lessonPlan.Summary);
         Logger.log(`Lesson Plan ${lessonPlan.id} rowID: 'Processed', lessonDetailsTab: cellValue: true  `);
-        updateCompleted(lessonPlan.id, 'Processed', lessonDetailsTab, true);
+        updateCompleted(lessonPlan.id, 'Processed', SHEETSDB.lessonSequence, true);
 
         if (i < lessonPlans.length - 1) {
             Utilities.sleep(1000);
@@ -37,14 +36,14 @@ async function processLessonPlans() {
 }
 
 async function createLessonPlan(lessonPlanSummary: string) {
-    let promptObjDetails = await getPromptObjDetails();
+    let promptObjDetails = getPromptObjDetails();
     let modelEndpoint = promptObjDetails.modelEndpoint;
     let promptRole = promptObjDetails.promptRole;
     let promptDetails = promptObjDetails.promptDetails;
     let promptFormat = promptObjDetails.promptFormat;
     let promptStructure = promptObjDetails.promptStructure;
     let payload = {
-        "model": "gpt-4",
+        "model": "gpt-4o",
         "messages": [
             {
                 "role": "system", "content": promptRole
@@ -79,45 +78,59 @@ async function createLessonPlan(lessonPlanSummary: string) {
     };
     let response = UrlFetchApp.fetch(modelEndpoint, options);
     let data = JSON.parse(response.getContentText());
-    Logger.log(data['choices'][0]['message']['content']);
-    writeJSONToSheet(data['choices'][0]['message']['content']);
+
+    let rawContent = data['choices'][0]['message']['content'];
+
+    // Remove backticks and "json" keyword if present
+    let cleanedContent = rawContent.replace(/```json|```/g, '').trim();
+
+    try {
+        // Parse the cleaned JSON string
+        let jsonContent = JSON.parse(cleanedContent);
+
+        // Log the cleaned content for debugging
+        Logger.log(jsonContent);
+
+        // Write the data to the sheet
+        writeDataToSheet(jsonContent);
+    } catch (error) {
+        Logger.log("Failed to parse JSON: " + error.message);
+        Logger.log("Raw Content: " + rawContent);
+    }
+
 }
-function writeJSONToSheet(data: string) {
-
-    let tabName = 'scripting_docs';
-
-    let writeLessonPlanResultsTab = courseSpreadsheet.getSheetByName(tabName);
-    // convert json to array
+function writeDataToSheet(data: string) {
+    let writeLessonPlanResultsTab = SHEETSDB.activityContent;
     let lastRow = writeLessonPlanResultsTab.getLastRow();
     let lastId = writeLessonPlanResultsTab.getRange(lastRow, 1).getValue();
     Logger.log(lastId + 1);
     let nextId = lastId + 1;
 
     let row = [];
-    let json = JSON.parse(data);
+
     row.push(nextId);
-    row.push(json['Unit']);
-    row.push(json['Title']);
-    row.push(json['Period']);
-    row.push(json['Main Topic']);
-    row.push(json['Introduction']);
-    row.push(json['Learning Objective 1']);
-    row.push(json['Learning Objective 2']);
-    row.push(json['Warm Up']);
-    row.push(json['Key Terms and Definitions']);
-    row.push(json['Essential Question']);
-    row.push(json['True or False Question']);
-    row.push(json['End of Lesson AP Classroom Big Idea Quiz']);
-    row.push(json['Next Lesson Preview']);
-    row.push(json['Answer Key for Essential Question']);
-    row.push(json['Answer Key for True or False Question']);
-    row.push(json['Completion Checklist']);
+    row.push(data['Unit']);
+    row.push(data['Title']);
+    row.push(data['Period']);
+    row.push(data['Main Topic']);
+    row.push(data['Introduction']);
+    row.push(data['Learning Objective 1']);
+    row.push(data['Learning Objective 2']);
+    row.push(data['Warm Up']);
+    row.push(data['Key Terms and Definitions']);
+    row.push(data['Essential Question']);
+    row.push(data['True or False Question']);
+    row.push(data['End of Lesson AP Classroom Big Idea Quiz']);
+    row.push(data['Next Lesson Preview']);
+    row.push(data['Answer Key for Essential Question']);
+    row.push(data['Answer Key for True or False Question']);
+    row.push(data['Completion Checklist']);
 
     writeLessonPlanResultsTab.appendRow(row);
 }
 
 function getLessonDetailsFromTab() {
-    let lessonPlanData = lessonDetailsTab.getDataRange().getValues();
+    let lessonPlanData = SHEETSDB.lessonSequence.getDataRange().getValues();
     let lessonPlanObjects = arrayOfObj(lessonPlanData);
     // Filter out rows where the "Summary" cell is not empty and the "Processed" cell is not true.
     let unprocessedSummaries = lessonPlanObjects.filter(function (obj: any) {

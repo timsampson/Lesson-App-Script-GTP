@@ -59,5 +59,5 @@ function createActivityDocument(document_content) {
     footer.replaceText('{{footer}}', footerReplacementText);
     header.replaceText('{{title}}', activity_filename);
     Logger.log(`Copied ${activity_filename} with ID: ${copy.getId()}`);
-    updateCompleted(document_content.id, 'doc_created', scriptingTab, true);
+    updateCompleted(document_content.id, 'doc_created', SHEETSDB.activityContent, true);
 }

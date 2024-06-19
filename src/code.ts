@@ -1,10 +1,14 @@
-const courseSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-const scripting_docs = courseSpreadsheet.getSheetByName('scripting_docs');
-const lessonDetailsTab = courseSpreadsheet.getSheetByName('lesson_details');
-const promptDetailsTab = courseSpreadsheet.getSheetByName('prompt_details');
-
+const LPSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+const SHEETSDB = {
+    lessonSequence: LPSpreadsheet.getSheetByName('lesson_sequence'),
+    activityContent: LPSpreadsheet.getSheetByName('activity_content'),
+    promptDetails: LPSpreadsheet.getSheetByName('prompt_details'),
+};
+/**
+ * Adds a custom menu to the Google Sheets UI.
+ */
 function onOpen() {
-    var ui = SpreadsheetApp.getUi();
+    const ui = SpreadsheetApp.getUi();
     ui.createMenu('Create Resources')
         .addItem('Create Docs and Slides', 'createAll')
         .addSeparator()
@@ -16,33 +20,33 @@ function onOpen() {
         .addToUi();
 }
 
+/**
+ * Creates resources based on the specified document type.
+ * @param {string} docType - The type of document to create ('documents', 'slides', 'all').
+ */
 function createResources(docType: string) {
     const records = getAllNewRecords();
 
     if (docType === 'documents') {
         const newRecords = records.filter(object => object.doc_created !== true);
-        newRecords.forEach((document_content) => {
+        newRecords.forEach(document_content => {
             createActivityDocument(document_content);
         });
     } else if (docType === 'slides') {
         const newRecords = records.filter(object => object.slide_created !== true);
-        newRecords.forEach((slides_content) => {
+        newRecords.forEach(slides_content => {
             createActivitySlide(slides_content);
         });
-    }
-    else if (docType === 'all') {
+    } else if (docType === 'all') {
         records.forEach((record, index) => {
             if (record.doc_created !== true) {
                 createActivityDocument(record);
             }
-            // Introduce a delay after creating a document
             Utilities.sleep(300);
 
             if (record.slide_created !== true) {
                 createActivitySlide(record);
             }
-            // Introduce a delay after creating a slide
-            // But don't sleep after the last record
             if (index < records.length - 1) {
                 Utilities.sleep(300);
             }
@@ -64,81 +68,80 @@ function createAll() {
     createResources('all');
 }
 
-// open the current sheet and get the tab by name
-const scriptingTab = courseSpreadsheet.getSheetByName('scripting_docs');
-let cs50sheetValues = scriptingTab.getDataRange().getValues();
+/**
+ * Gets all new records from the    activityContent: LPSpreadsheet.getSheetByName('activity_content'),
+ sheet.
+ * @returns {Array<worksheet_content>} An array of new records.
+ */
+function getAllNewRecords(): Array<worksheet_content> {
+    const activityRecords = SHEETSDB.activityContent.getDataRange().getValues();
+    const colNumDoc = activityRecords[0].findIndex(col => col === 'doc_created');
+    const colNumSlide = activityRecords[0].findIndex(col => col === 'slide_created');
 
-// get the list of of values for the documents
-function getAllNewRecords() {
-    // get the column number for the doc_created column
-    let colNumDoc = cs50sheetValues[0].findIndex((col) => col === 'doc_created');
-    let colNumSlide = cs50sheetValues[0].findIndex((col) => col === 'slide_created');
-    // check if the columns were found
     if (colNumDoc === -1 || colNumSlide === -1) {
         throw new Error('doc_created or slide_created column not found');
     }
 
-    // get the records from the sheet
-    const newRecords = cs50sheetValues.filter(record => (record[colNumDoc] !== true || record[colNumSlide] !== true));
-
-    // create an array of objects from the records
+    const newRecords = activityRecords.filter(record => (record[colNumDoc] !== true || record[colNumSlide] !== true));
     const records = arrayOfObj(newRecords);
-    // for each record if the key value for created is not true then add the record to the list
-    // should be the same as the filter above
     const placeholders = records.filter(object => object.doc_created !== true || object.slide_created !== true);
-    // return the list of records
+
     Logger.log(placeholders);
     return placeholders;
 }
 
+/**
+ * Updates the completion status of a record in the specified sheet.
+ * @param {string} rowID - The ID of the row to update.
+ * @param {string} colID - The ID of the column to update.
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} tabName - The sheet to update.
+ * @param {boolean} cellValue - The value to set in the cell.
+ */
 function updateCompleted(rowID: string, colID: string, tabName: GoogleAppsScript.Spreadsheet.Sheet, cellValue: boolean) {
-    // get the current values of sheetName
-    let sheetValues = tabName.getDataRange().getValues();
-    // get the row number for a value in the first column of a 2d array
-    let rowNum = sheetValues.findIndex((row) => row[0] === rowID);
-    // get the column number for a value in the first row of a 2d array
-    let colNum = sheetValues[0].findIndex((col) => col === colID);
-    // update the value of the cell
+    const sheetValues = tabName.getDataRange().getValues();
+    const rowNum = sheetValues.findIndex(row => row[0] === rowID);
+    const colNum = sheetValues[0].findIndex(col => col === colID);
     tabName.getRange(rowNum + 1, colNum + 1).setValue(cellValue);
 }
 
+/**
+ * Updates a table in a Google Document with the specified placeholder and array values.
+ * @param {GoogleAppsScript.Document.Table[]} tables - The tables to update.
+ * @param {string} placeholder - The placeholder text to replace.
+ * @param {any} targetCell - The target cell to update.
+ * @param {string[]} arr - The array of values to insert.
+ * @returns {any} The updated target cell.
+ */
 function updateTable(tables: GoogleAppsScript.Document.Table[], placeholder: string, targetCell: any, arr: string[]) {
-    for (let i = 0; i < tables.length; i++) {
-        let rows = tables[i].getNumRows();
+    for (const table of tables) {
+        const rows = table.getNumRows();
         for (let j = 0; j < rows; j++) {
-            let row = tables[i].getRow(j);
-            let cells = row.getNumCells();
+            const row = table.getRow(j);
+            const cells = row.getNumCells();
             for (let k = 0; k < cells; k++) {
-                let cell = row.getCell(k);
-                if (cell.getText().indexOf('{{' + placeholder + '}}') > -1) {
+                const cell = row.getCell(k);
+                if (cell.getText().includes(`{{${placeholder}}}`)) {
                     targetCell = cell;
                     break;
                 }
             }
-            if (targetCell) {
-                break;
-            }
+            if (targetCell) break;
         }
-        if (targetCell) {
-            break;
-        }
+        if (targetCell) break;
     }
 
-    // If we found the cell
     if (targetCell) {
-        var targetRow = targetCell.getParentRow();
-        var targetTable = targetRow.getParentTable();
-        var rowIndex = targetTable.getChildIndex(targetRow);
+        const targetRow = targetCell.getParentRow();
+        const targetTable = targetRow.getParentTable();
+        const rowIndex = targetTable.getChildIndex(targetRow);
 
-        // Replace placeholder with first list item
         targetCell.setText(arr[0]);
 
-        // Add new rows for each remaining list item
-        for (var i = 1; i < arr.length; i++) {
-            var newRow = targetTable.insertTableRow(rowIndex + i);
-            var leftCellCopy = targetRow.getCell(0).copy(); // Create a new copy for each iteration
-            newRow.appendTableCell(leftCellCopy); // Left column
-            newRow.appendTableCell(arr[i]); // Right column
+        for (let i = 1; i < arr.length; i++) {
+            const newRow = targetTable.insertTableRow(rowIndex + i);
+            const leftCellCopy = targetRow.getCell(0).copy();
+            newRow.appendTableCell(leftCellCopy);
+            newRow.appendTableCell(arr[i]);
         }
     }
     return targetCell;
@@ -170,13 +173,17 @@ type worksheet_content = {
     slide_created: boolean
 }
 
-function arrayOfObj(newRecords: any[][]) {
+/**
+ * Converts a 2D array of records into an array of objects.
+ * @param {any[][]} newRecords - The 2D array of records.
+ * @returns {Array<worksheet_content>} An array of objects representing the records.
+ */
+function arrayOfObj(newRecords: any[][]): Array<worksheet_content> {
     const [keys, ...rows] = newRecords;
-    const objects = rows.map(row => {
+    return rows.map(row => {
         return row.reduce((object, value, index) => {
             object[keys[index]] = value;
             return object;
-        }, {});
+        }, {} as worksheet_content);
     });
-    return objects;
 }
