@@ -5,7 +5,20 @@ type PromptDetailsObj = {
     promptFormat: string,
     promptStructure: string
 }
+/**
+ * @typedef {Object} PromptDetailsObj
+ * @property {string} modelEndpoint - The model endpoint.
+ * @property {string} promptRole - The role of the prompt.
+ * @property {string} promptDetails - The details of the prompt.
+ * @property {string} promptFormat - The format of the prompt.
+ * @property {string} promptStructure - The structure of the prompt.
+ */
 
+/**
+ * Retrieves the prompt object details from the Google Sheets database.
+ * 
+ * @returns {PromptDetailsObj} An object containing prompt details.
+ */
 function getPromptObjDetails(): PromptDetailsObj {
     let promptDetailsValues: Array<Array<string>> = SHEETSDB.promptDetails.getDataRange().getValues();
     // Remove the first row (header) from the data
@@ -18,7 +31,9 @@ function getPromptObjDetails(): PromptDetailsObj {
     return promptDetailsObj as PromptDetailsObj;
 }
 
-
+/**
+ * Processes lesson plans by creating them and updating their status.
+ */
 async function processLessonPlans() {
     let lessonPlans = getLessonDetailsFromTab();
 
@@ -35,6 +50,11 @@ async function processLessonPlans() {
     }
 }
 
+/**
+ * Creates a lesson plan based on the provided summary.
+ * 
+ * @param {string} lessonPlanSummary - The summary of the lesson plan.
+ */
 async function createLessonPlan(lessonPlanSummary: string) {
     let promptObjDetails = getPromptObjDetails();
     let modelEndpoint = promptObjDetails.modelEndpoint;
@@ -97,8 +117,13 @@ async function createLessonPlan(lessonPlanSummary: string) {
         Logger.log("Failed to parse JSON: " + error.message);
         Logger.log("Raw Content: " + rawContent);
     }
-
 }
+
+/**
+ * Writes data to the Google Sheets.
+ * 
+ * @param {string} data - The data to be written to the sheet.
+ */
 function writeDataToSheet(data: string) {
     let writeLessonPlanResultsTab = SHEETSDB.activityContent;
     let lastRow = writeLessonPlanResultsTab.getLastRow();
@@ -129,6 +154,11 @@ function writeDataToSheet(data: string) {
     writeLessonPlanResultsTab.appendRow(row);
 }
 
+/**
+ * Retrieves lesson details from the Google Sheets tab.
+ * 
+ * @returns {Array<Object>} An array of unprocessed lesson plan objects.
+ */
 function getLessonDetailsFromTab() {
     let lessonPlanData = SHEETSDB.lessonSequence.getDataRange().getValues();
     let lessonPlanObjects = arrayOfObj(lessonPlanData);
@@ -140,22 +170,4 @@ function getLessonDetailsFromTab() {
     });
 
     return unprocessedSummaries;
-}
-
-// lesson details google sheet column headers: Week	Order	Unit	Title	Period	Main Topic	Enduring Understanding	Suggested Skills	AP Classroom's Big Idea Quiz	Previous Lesson	Next Lesson	Summary	Processed
-type lesson_details_tab = {
-    id: number,
-    Week: string,
-    Order: string,
-    Unit: string,
-    Title: string,
-    Period: string,
-    Main_Topic: string,
-    Enduring_Understanding: string,
-    Suggested_Skills: string,
-    AP_Classroom_s_Big_Idea_Quiz: string,
-    Previous_Lesson: string,
-    Next_Lesson: string,
-    Summary: string,
-    Processed: string
 }

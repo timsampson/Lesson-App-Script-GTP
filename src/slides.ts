@@ -1,12 +1,11 @@
-function createActivitySlide(slides_content) {
+function createActivitySlide(lessonContent: LessonContent) {
     const slideTemplateID = "1p44YQJ8kRWToz2racG-mYlurWMMFl1MdlD6HOFOJNBg";
     const slideTemplate = DriveApp.getFileById(slideTemplateID);
-    let activity_filename = (`U${slides_content.unit} ~ Period ${slides_content.period} ~ ${slides_content.title} ~ ${slides_content.main_topic}`);
+    let activityFilename = (`U${lessonContent.unit}P${lessonContent.period} Presentation ${lessonContent.title} ~ ${lessonContent.mainTopic}`);
     let parentFolder = slideTemplate.getParents().next();
-    let copy = slideTemplate.makeCopy(activity_filename, parentFolder);
+    let copy = slideTemplate.makeCopy(activityFilename, parentFolder);
     // Get the document by ID
     let presentation = SlidesApp.openById(copy.getId());
-    let presentationId = presentation.getId();
     let lectureVideoElement;
 
     let pageWidth = presentation.getPageWidth();
@@ -15,19 +14,29 @@ function createActivitySlide(slides_content) {
     let videoLeft = (pageWidth - videoWidth) / 2;
     let videoTop = 40;
 
+    let topicSlideVideoOne = presentation.getSlides()[5];
+    let topicSlideVideoTwo = presentation.getSlides()[6];
+    let exitTrueFalseAKSlide = presentation.getSlides()[10];
+    let exitEssentialQuestionAKFalseSlide = presentation.getSlides()[11];
+    exitTrueFalseAKSlide.setSkipped(true);
+    exitEssentialQuestionAKFalseSlide.setSkipped(true);
+
     try {
-        lectureVideoElement = presentation.getSlides()[5].insertVideo(slides_content.video_lecture, videoLeft, videoTop, videoWidth, videoHeight); // This gets the 6th 
-        let lectureVideoObjectId = lectureVideoElement.getObjectId();
+        lectureVideoElement = topicSlideVideoOne.insertVideo(lessonContent.videoLecture, videoLeft, videoTop, videoWidth, videoHeight); // This gets the 6th 
     }
     catch (error) {
         Logger.log(`Error inserting video: ${error}`);
-        presentation.getSlides()[5].insertTextBox('Video could not be inserted.', videoLeft, videoTop, videoWidth, videoHeight);
+        presentation.getSlides()[5].insertTextBox('Insert video or if not needed, delete this slide.', videoLeft, videoTop, videoWidth, videoHeight);
+        topicSlideVideoOne.setSkipped(true); // Hide the slide if no video provided
     }
+    // Insert topic video on the 7th slide
+
     try {
-        presentation.getSlides()[6].insertVideo(slides_content.video_topic, videoLeft, videoTop, videoWidth, videoHeight); // This gets the 7th slide
+        let topicVideoElement = topicSlideVideoTwo.insertVideo(lessonContent.videoTopic, videoLeft, videoTop, videoWidth, videoHeight);
     } catch (error) {
-        Logger.log(`Error inserting video: ${error}`);
-        presentation.getSlides()[6].insertTextBox('Video could not be inserted.', videoLeft, videoTop, videoWidth, videoHeight);
+        Logger.log(`Error inserting topic video: ${error}`);
+        topicSlideVideoTwo.insertTextBox('Insert video or if not needed, delete this slide.', videoLeft, videoTop, videoWidth, videoHeight);
+        topicSlideVideoTwo.setSkipped(true); // Hide the slide if no video provided
     }
 
     presentation.getSlides().forEach(function (slide) {
@@ -36,10 +45,10 @@ function createActivitySlide(slides_content) {
                 const shape = pageElement.asShape();
                 const textRange = shape.getText();
                 if (textRange) {  // check if the TextRange is not null
-                    for (const key in slides_content) {
-                        if (slides_content.hasOwnProperty(key)) {
+                    for (const key in lessonContent) {
+                        if (lessonContent.hasOwnProperty(key)) {
                             const placeholder = `{{${key}}}`;
-                            let replacement = slides_content[key];
+                            let replacement = lessonContent[key];
 
                             // if the key is 'completion_checklist' or 'key_terms_and_definitions', replace '|' with '\n'
                             if (key === 'completion_checklist' || key === 'key_terms_and_definitions') {
@@ -53,8 +62,8 @@ function createActivitySlide(slides_content) {
             }
         });
     });
-    Logger.log(`Copied ${activity_filename} with ID: ${copy.getId()}`);
-    updateCompleted(slides_content.id, 'slide_created', scripting_docs, true);
+    Logger.log(`Copied ${activityFilename} with ID: ${copy.getId()}`);
+    updateCompleted(lessonContent.id, 'slideCreated', SHEETSDB.activityContent, true);
 }
 
 function processText(input: string) {

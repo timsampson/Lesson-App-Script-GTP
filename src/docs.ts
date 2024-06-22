@@ -1,9 +1,9 @@
 
-function createActivityDocument(document_content) {
+function createActivityDocument(document_content: LessonContent) {
     const activityTemplateID = "1hIsEy8fWHH1u7vEoTvPT80lqB9jK3Mvk-TERjfQ4G3E";
     const activityTemplate = DriveApp.getFileById(activityTemplateID);
 
-    let activity_filename = (`U${document_content.unit} ~ Period ${document_content.period} ~ ${document_content.title} ~ ${document_content.main_topic}`);
+    let activity_filename = (`U${document_content.unit} ~ Period ${document_content.period} ~ ${document_content.title} ~ ${document_content.mainTopic}`);
     let parentFolder = activityTemplate.getParents().next();
     let copy = activityTemplate.makeCopy(activity_filename, parentFolder);
     // Get the document by ID
@@ -14,7 +14,7 @@ function createActivityDocument(document_content) {
     let header = document.getHeader();
     // Replace each placeholder with its corresponding value from the replacements object
     for (let placeholder in document_content) {
-        if (placeholder === 'completion_checklist') {
+        if (placeholder === 'completionChecklist') {
             let arr = document_content[placeholder].split('|').map(item => {
                 item = item.trim();
                 if (item[item.length - 1] !== '.') {
@@ -27,7 +27,7 @@ function createActivityDocument(document_content) {
             let targetCell;
             // Find the cell containing the placeholder
             targetCell = updateTable(tables, placeholder, targetCell, arr);
-        } else if (placeholder === 'key_terms_and_definitions') {
+        } else if (placeholder === 'keyTermsAndDefinitions') {
             let arr = document_content[placeholder].split('|').map(item => {
                 item = item.trim();
                 if (item[item.length - 1] !== '.') {
@@ -55,9 +55,9 @@ function createActivityDocument(document_content) {
             body.replaceText('{{' + placeholder + '}}', document_content[placeholder]);
         }
     }
-    let footerReplacementText = `U${document_content.unit} ~ Period ${document_content.period} ~ ${document_content.title} ~ ${document_content.main_topic}`;
+    let footerReplacementText = `U${document_content.unit} ~ Period ${document_content.period} ~ ${document_content.title} ~ ${document_content.mainTopic}`;
     footer.replaceText('{{footer}}', footerReplacementText);
     header.replaceText('{{title}}', activity_filename);
     Logger.log(`Copied ${activity_filename} with ID: ${copy.getId()}`);
-    updateCompleted(document_content.id, 'doc_created', SHEETSDB.activityContent, true);
+    updateCompleted(document_content.id, 'activityDocCreated', SHEETSDB.activityContent, true);
 }

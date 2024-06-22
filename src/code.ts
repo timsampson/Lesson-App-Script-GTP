@@ -1,50 +1,91 @@
-const LPSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-const SHEETSDB = {
+const LPSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+const SHEETSDB: {
+    lessonSequence: GoogleAppsScript.Spreadsheet.Sheet | null,
+    activityContent: GoogleAppsScript.Spreadsheet.Sheet | null,
+    promptDetails: GoogleAppsScript.Spreadsheet.Sheet | null
+} = {
     lessonSequence: LPSpreadsheet.getSheetByName('lesson_sequence'),
     activityContent: LPSpreadsheet.getSheetByName('activity_content'),
     promptDetails: LPSpreadsheet.getSheetByName('prompt_details'),
 };
+
 /**
  * Adds a custom menu to the Google Sheets UI.
  */
 function onOpen() {
     const ui = SpreadsheetApp.getUi();
-    ui.createMenu('Create Resources')
-        .addItem('Create Docs and Slides', 'createAll')
+    ui.createMenu('Create Resources 🎨')
+        .addItem('Create All Resources 📚', 'createAll')
         .addSeparator()
-        .addItem('Create Documents', 'createDocuments')
+        .addItem('Create Activity Documents 📕', 'createDocuments')
         .addSeparator()
-        .addItem('Create Slides', 'createSlides')
+        .addItem('Create Slides 📗', 'createSlides')
         .addSeparator()
-        .addItem('Create LP Details', 'processLessonPlans')
+        .addItem('Create Lesson Plans 📘', 'createLessonPlans')
+        .addSeparator()
+        .addItem('Create Lesson Content 🤖', 'processLessonPlans')
         .addToUi();
 }
 
 /**
+ * Creates documents by calling the createResources function with 'documents' as the argument.
+ */
+function createDocuments() {
+    createResources('documents');
+}
+
+/**
+ * Creates slides by calling the createResources function with 'slides' as the argument.
+ */
+function createSlides() {
+    createResources('slides');
+}
+
+/**
+ * Creates slides by calling the createResources function with 'slides' as the argument.
+ */
+function createLessonPlans() {
+    createResources('lessonPlans');
+}
+/**
+ * Creates all resources (documents, slides and lesson plans) by calling the createResources function with 'all' as the argument.
+ */
+function createAll() {
+    createResources('all');
+}
+
+
+/**
  * Creates resources based on the specified document type.
- * @param {string} docType - The type of document to create ('documents', 'slides', 'all').
+ * @param {string} docType - The type of document to create ('documents', 'slides', lessonPlans, 'all').
  */
 function createResources(docType: string) {
     const records = getAllNewRecords();
 
     if (docType === 'documents') {
-        const newRecords = records.filter(object => object.doc_created !== true);
-        newRecords.forEach(document_content => {
-            createActivityDocument(document_content);
+        const newRecords = records.filter(object => object.activityDocCreated !== true);
+        newRecords.forEach(lessonContent => {
+            createActivityDocument(lessonContent);
         });
     } else if (docType === 'slides') {
-        const newRecords = records.filter(object => object.slide_created !== true);
-        newRecords.forEach(slides_content => {
-            createActivitySlide(slides_content);
+        const newRecords = records.filter(object => object.slideCreated !== true);
+        newRecords.forEach(lessonContent => {
+            createActivitySlide(lessonContent);
         });
+    } else if (docType === 'lessonPlans') {
+        const newRecords = records.filter(object => object.lessonPlanCreated !== true);
+        newRecords.forEach(lessonContent => {
+            createLessonPlanDocument(lessonContent);
+        });
+
     } else if (docType === 'all') {
         records.forEach((record, index) => {
-            if (record.doc_created !== true) {
+            if (record.activityDocCreated !== true) {
                 createActivityDocument(record);
             }
             Utilities.sleep(300);
 
-            if (record.slide_created !== true) {
+            if (record.slideCreated !== true) {
                 createActivitySlide(record);
             }
             if (index < records.length - 1) {
@@ -56,38 +97,20 @@ function createResources(docType: string) {
     }
 }
 
-function createDocuments() {
-    createResources('documents');
-}
-
-function createSlides() {
-    createResources('slides');
-}
-
-function createAll() {
-    createResources('all');
-}
-
 /**
- * Gets all new records from the    activityContent: LPSpreadsheet.getSheetByName('activity_content'),
- sheet.
- * @returns {Array<worksheet_content>} An array of new records.
+ * Gets all new records from the activityContent sheet.
+ * @returns {Array<LessonContent>} An array of new records.
  */
-function getAllNewRecords(): Array<worksheet_content> {
+function getAllNewRecords(): Array<LessonContent> {
     const activityRecords = SHEETSDB.activityContent.getDataRange().getValues();
-    const colNumDoc = activityRecords[0].findIndex(col => col === 'doc_created');
-    const colNumSlide = activityRecords[0].findIndex(col => col === 'slide_created');
 
-    if (colNumDoc === -1 || colNumSlide === -1) {
-        throw new Error('doc_created or slide_created column not found');
-    }
+    // Convert the 2D array into an array of objects
+    const records = arrayOfObj(activityRecords);
 
-    const newRecords = activityRecords.filter(record => (record[colNumDoc] !== true || record[colNumSlide] !== true));
-    const records = arrayOfObj(newRecords);
-    const placeholders = records.filter(object => object.doc_created !== true || object.slide_created !== true);
+    // Filter the records where docCreated or slideCreated is not true
+    const newRecords = records.filter(record => !record.activityDocCreated || !record.slideCreated);
 
-    Logger.log(placeholders);
-    return placeholders;
+    return newRecords;
 }
 
 /**
@@ -147,43 +170,18 @@ function updateTable(tables: GoogleAppsScript.Document.Table[], placeholder: str
     return targetCell;
 }
 
-type worksheet_content = {
-    id: string,
-    unit: string,
-    title: string,
-    main_topic: string,
-    period: string,
-    introduction: string,
-    lecture_video: string,
-    topic_video_title: string,
-    lecture_video_title: string,
-    topic_video: string,
-    learning_objective_1: string,
-    learning_objective_2: string,
-    warm_up: string,
-    key_terms_and_definitions: string,
-    essential_question: string,
-    true_or_false_question: string,
-    end_of_lesson_quiz: string,
-    next_lesson_preview: string,
-    ak_for_essential_question: string,
-    k_true_false: string,
-    completion_checklist: string,
-    doc_created: boolean,
-    slide_created: boolean
-}
 
 /**
  * Converts a 2D array of records into an array of objects.
  * @param {any[][]} newRecords - The 2D array of records.
  * @returns {Array<worksheet_content>} An array of objects representing the records.
  */
-function arrayOfObj(newRecords: any[][]): Array<worksheet_content> {
+function arrayOfObj(newRecords: any[][]): Array<LessonContent> {
     const [keys, ...rows] = newRecords;
     return rows.map(row => {
         return row.reduce((object, value, index) => {
             object[keys[index]] = value;
             return object;
-        }, {} as worksheet_content);
+        }, {} as LessonContent);
     });
 }
