@@ -1,4 +1,5 @@
 const LPSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+
 const SHEETSDB: {
     lessonSequence: GoogleAppsScript.Spreadsheet.Sheet | null,
     activityContent: GoogleAppsScript.Spreadsheet.Sheet | null,
@@ -15,15 +16,15 @@ const SHEETSDB: {
 function onOpen() {
     const ui = SpreadsheetApp.getUi();
     ui.createMenu('Create Resources 🎨')
-        .addItem('Create All Resources 📚', 'createAll')
+        .addItem('📚 Create All Resources', 'createAll')
         .addSeparator()
-        .addItem('Create Activity Documents 📕', 'createDocuments')
+        .addItem('📕 Create Activity Documents', 'createDocuments')
         .addSeparator()
-        .addItem('Create Slides 📗', 'createSlides')
+        .addItem('📗 Create Slides', 'createSlides')
         .addSeparator()
-        .addItem('Create Lesson Plans 📘', 'createLessonPlans')
+        .addItem('📘 Create Lesson Plans', 'createLessonPlan')
         .addSeparator()
-        .addItem('Create Lesson Content 🤖', 'processLessonPlans')
+        .addItem('🤖 Process Lesson Content', 'processLessonContent')
         .addToUi();
 }
 
@@ -44,7 +45,7 @@ function createSlides() {
 /**
  * Creates slides by calling the createResources function with 'slides' as the argument.
  */
-function createLessonPlans() {
+function generateLessonPlans() {
     createResources('lessonPlans');
 }
 /**
@@ -54,13 +55,12 @@ function createAll() {
     createResources('all');
 }
 
-
 /**
  * Creates resources based on the specified document type.
  * @param {string} docType - The type of document to create ('documents', 'slides', lessonPlans, 'all').
  */
 function createResources(docType: string) {
-    const records = getAllNewRecords();
+    const records: LessonContent[] = getAllActivityRecords();
 
     if (docType === 'documents') {
         const newRecords = records.filter(object => object.activityDocCreated !== true);
@@ -73,13 +73,13 @@ function createResources(docType: string) {
             createActivitySlide(lessonContent);
         });
     } else if (docType === 'lessonPlans') {
-        const newRecords = records.filter(object => object.lessonPlanCreated !== true);
+        const newRecords: LessonContent[] = records.filter(object => object.lessonPlanCreated !== true);
         newRecords.forEach(lessonContent => {
-            createLessonPlanDocument(lessonContent);
+            createLessonPlan(lessonContent);
         });
 
     } else if (docType === 'all') {
-        records.forEach((record, index) => {
+        records.forEach((record: LessonContent, index) => {
             if (record.activityDocCreated !== true) {
                 createActivityDocument(record);
             }
@@ -87,6 +87,11 @@ function createResources(docType: string) {
 
             if (record.slideCreated !== true) {
                 createActivitySlide(record);
+            }
+            Utilities.sleep(300);
+
+            if (record.lessonPlanCreated !== true) {
+                createLessonPlan(record);
             }
             if (index < records.length - 1) {
                 Utilities.sleep(300);
@@ -101,11 +106,11 @@ function createResources(docType: string) {
  * Gets all new records from the activityContent sheet.
  * @returns {Array<LessonContent>} An array of new records.
  */
-function getAllNewRecords(): Array<LessonContent> {
+function getAllActivityRecords(): Array<LessonContent> {
     const activityRecords = SHEETSDB.activityContent.getDataRange().getValues();
 
     // Convert the 2D array into an array of objects
-    const records = arrayOfObj(activityRecords);
+    const records: LessonContent[] = arrayOfObj(activityRecords);
 
     // Filter the records where docCreated or slideCreated is not true
     const newRecords = records.filter(record => !record.activityDocCreated || !record.slideCreated);
@@ -135,7 +140,7 @@ function updateCompleted(rowID: string, colID: string, tabName: GoogleAppsScript
  * @param {string[]} arr - The array of values to insert.
  * @returns {any} The updated target cell.
  */
-function updateTable(tables: GoogleAppsScript.Document.Table[], placeholder: string, targetCell: any, arr: string[]) {
+function updateTable(tables: GoogleAppsScript.Document.Table[], placeholder: string, targetCell: any, arr: string[]): any {
     for (const table of tables) {
         const rows = table.getNumRows();
         for (let j = 0; j < rows; j++) {
@@ -170,18 +175,17 @@ function updateTable(tables: GoogleAppsScript.Document.Table[], placeholder: str
     return targetCell;
 }
 
-
 /**
  * Converts a 2D array of records into an array of objects.
  * @param {any[][]} newRecords - The 2D array of records.
- * @returns {Array<worksheet_content>} An array of objects representing the records.
+ * @returns {Array<T>} An array of objects representing the records.
  */
-function arrayOfObj(newRecords: any[][]): Array<LessonContent> {
+function arrayOfObj<T>(newRecords: any[][]): Array<T> {
     const [keys, ...rows] = newRecords;
     return rows.map(row => {
         return row.reduce((object, value, index) => {
             object[keys[index]] = value;
             return object;
-        }, {} as LessonContent);
+        }, {} as T);
     });
 }

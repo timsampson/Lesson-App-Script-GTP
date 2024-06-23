@@ -3,7 +3,7 @@ function createActivityDocument(document_content: LessonContent) {
     const activityTemplateID = "1hIsEy8fWHH1u7vEoTvPT80lqB9jK3Mvk-TERjfQ4G3E";
     const activityTemplate = DriveApp.getFileById(activityTemplateID);
 
-    let activity_filename = (`U${document_content.unit} ~ Period ${document_content.period} ~ ${document_content.title} ~ ${document_content.mainTopic}`);
+    let activity_filename = (`U${document_content.unit}P${document_content.period} ${document_content.title} ${document_content.mainTopic}`);
     let parentFolder = activityTemplate.getParents().next();
     let copy = activityTemplate.makeCopy(activity_filename, parentFolder);
     // Get the document by ID
@@ -55,7 +55,7 @@ function createActivityDocument(document_content: LessonContent) {
             body.replaceText('{{' + placeholder + '}}', document_content[placeholder]);
         }
     }
-    let footerReplacementText = `U${document_content.unit} ~ Period ${document_content.period} ~ ${document_content.title} ~ ${document_content.mainTopic}`;
+    let footerReplacementText = `U${document_content.unit}P${document_content.period} ${document_content.mainTopic}`;
     footer.replaceText('{{footer}}', footerReplacementText);
     header.replaceText('{{title}}', activity_filename);
     Logger.log(`Copied ${activity_filename} with ID: ${copy.getId()}`);

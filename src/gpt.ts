@@ -1,82 +1,56 @@
-type PromptDetailsObj = {
-    modelEndpoint: string,
-    promptRole: string,
-    promptDetails: string,
-    promptFormat: string,
-    promptStructure: string
-}
-/**
- * @typedef {Object} PromptDetailsObj
- * @property {string} modelEndpoint - The model endpoint.
- * @property {string} promptRole - The role of the prompt.
- * @property {string} promptDetails - The details of the prompt.
- * @property {string} promptFormat - The format of the prompt.
- * @property {string} promptStructure - The structure of the prompt.
- */
-
 /**
  * Retrieves the prompt object details from the Google Sheets database.
  * 
  * @returns {PromptDetailsObj} An object containing prompt details.
  */
 function getPromptObjDetails(): PromptDetailsObj {
-    let promptDetailsValues: Array<Array<string>> = SHEETSDB.promptDetails.getDataRange().getValues();
-    // Remove the first row (header) from the data
-    promptDetailsValues.shift();
-    // Create the promptDetailsObj object
-    let promptDetailsObj: Partial<PromptDetailsObj> = promptDetailsValues.reduce((obj, row) => {
-        obj[row[0] as keyof PromptDetailsObj] = row[1];
-        return obj;
-    }, {} as Partial<PromptDetailsObj>);
-    return promptDetailsObj as PromptDetailsObj;
+    let promptDetailsValues = SHEETSDB.promptDetails.getDataRange().getValues();
+
+    // Convert the 2D array to an array of objects
+    let promptDetailsArray = arrayOfObj(promptDetailsValues);
+
+    // Extract the first object from the array
+    let promptDetails = promptDetailsArray[0];
+
+    return promptDetails as PromptDetailsObj;
 }
-
 /**
- * Processes lesson plans by creating them and updating their status.
+ * Processes records from the lesson sequence sheet.
  */
-async function processLessonPlans() {
-    let lessonPlans = getLessonDetailsFromTab();
+async function processLessonContent() {
+    let unprocessedLessonPlans: LessonSequence[] = getLessonDetailsFromTab();
 
-    for (let i = 0; i < lessonPlans.length; i++) {
-        const lessonPlan = lessonPlans[i];
-        Logger.log(lessonPlan.Summary);
-        await createLessonPlan(lessonPlan.Summary);
-        Logger.log(`Lesson Plan ${lessonPlan.id} rowID: 'Processed', lessonDetailsTab: cellValue: true  `);
-        updateCompleted(lessonPlan.id, 'Processed', SHEETSDB.lessonSequence, true);
+    for (let lessonPlan of unprocessedLessonPlans) {
+        let isValidContent = await generateLessonContent(lessonPlan.summary);
 
-        if (i < lessonPlans.length - 1) {
-            Utilities.sleep(1000);
-        }
+        updateCompleted(lessonPlan.id, 'processed', SHEETSDB.lessonSequence, isValidContent);
+
+        // Sleep for 1 second between requests to avoid overloading the API
+        Utilities.sleep(1000);
     }
 }
+
 
 /**
  * Creates a lesson plan based on the provided summary.
  * 
  * @param {string} lessonPlanSummary - The summary of the lesson plan.
  */
-async function createLessonPlan(lessonPlanSummary: string) {
-    let promptObjDetails = getPromptObjDetails();
+async function generateLessonContent(lessonPlanSummary: string): Promise<boolean> {
+    let promptObjDetails: PromptDetailsObj = getPromptObjDetails();
     let modelEndpoint = promptObjDetails.modelEndpoint;
-    let promptRole = promptObjDetails.promptRole;
-    let promptDetails = promptObjDetails.promptDetails;
-    let promptFormat = promptObjDetails.promptFormat;
-    let promptStructure = promptObjDetails.promptStructure;
+    // Concatenate the system messages into one
+    let systemMessageContent = `
+        ${promptObjDetails.promptRole}
+        ${promptObjDetails.promptStructure}
+        ${promptObjDetails.promptDetails}
+        ${promptObjDetails.promptFormat}
+    `;
+
     let payload = {
         "model": "gpt-4o",
         "messages": [
-            {
-                "role": "system", "content": promptRole
-            },
-            {
-                "role": "system", "content": promptStructure
-            },
-            {
-                "role": "system", "content": promptDetails
-            },
-            {
-                "role": "system", "content": promptFormat
-            },
+            { "role": "system", "content": systemMessageContent },
             {
                 "role": "user",
                 "content": lessonPlanSummary
@@ -116,7 +90,9 @@ async function createLessonPlan(lessonPlanSummary: string) {
     } catch (error) {
         Logger.log("Failed to parse JSON: " + error.message);
         Logger.log("Raw Content: " + rawContent);
+        return false;
     }
+    return true;
 }
 
 /**
@@ -159,15 +135,15 @@ function writeDataToSheet(data: string) {
  * 
  * @returns {Array<Object>} An array of unprocessed lesson plan objects.
  */
-function getLessonDetailsFromTab() {
+function getLessonDetailsFromTab(): LessonSequence[] {
     let lessonPlanData = SHEETSDB.lessonSequence.getDataRange().getValues();
-    let lessonPlanObjects = arrayOfObj(lessonPlanData);
+    let lessonPlanObjects: LessonSequence[] = arrayOfObj(lessonPlanData);
     // Filter out rows where the "Summary" cell is not empty and the "Processed" cell is not true.
-    let unprocessedSummaries = lessonPlanObjects.filter(function (obj: any) {
-        return obj.Summary && obj.Processed !== true;
+    let unprocessedSummaries = lessonPlanObjects.filter(function (obj: LessonSequence) {
+        return obj.summary && obj.processed !== true;
     }).map(function (obj: any) {
         return obj;
     });
 
-    return unprocessedSummaries;
+    return unprocessedSummaries as LessonSequence[];
 }

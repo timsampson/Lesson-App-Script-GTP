@@ -44,7 +44,22 @@ type LessonContent = {
     lessonPlanCreated: boolean;
 };
 
+type PromptDetailsObj = {
+    modelEndpoint: string,
+    promptRole: string,
+    promptDetails: string,
+    promptFormat: string,
+    promptStructure: string
+}
 
+/**
+ * @typedef {Object} PromptDetailsObj
+ * @property {string} modelEndpoint - The model endpoint.
+ * @property {string} promptRole - The role of the prompt.
+ * @property {string} promptDetails - The details of the prompt.
+ * @property {string} promptFormat - The format of the prompt.
+ * @property {string} promptStructure - The structure of the prompt.
+ */
 /**
  * Represents the lesson sequence structure.
  * 

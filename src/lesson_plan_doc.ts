@@ -3,7 +3,7 @@
  * 
  * @param {LessonContent} lessonContent - The content for the lesson plan, including placeholders to be replaced.
  */
-function createLessonPlanDocument(lessonContent: LessonContent) {
+function createLessonPlan(lessonContent: LessonContent) {
     const LessonPlanTemplateID = "1OU-njdY2tVkeBBXyHnduv18JAvFg4CidwpWlUGn9kkA";
     const lessonPlanTemplate = DriveApp.getFileById(LessonPlanTemplateID);
 

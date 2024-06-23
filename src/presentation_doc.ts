@@ -6,7 +6,6 @@ function createActivitySlide(lessonContent: LessonContent) {
     let copy = slideTemplate.makeCopy(activityFilename, parentFolder);
     // Get the document by ID
     let presentation = SlidesApp.openById(copy.getId());
-    let lectureVideoElement;
 
     let pageWidth = presentation.getPageWidth();
     let videoWidth = 480;
@@ -22,17 +21,17 @@ function createActivitySlide(lessonContent: LessonContent) {
     exitEssentialQuestionAKFalseSlide.setSkipped(true);
 
     try {
-        lectureVideoElement = topicSlideVideoOne.insertVideo(lessonContent.videoLecture, videoLeft, videoTop, videoWidth, videoHeight); // This gets the 6th 
+        topicSlideVideoOne.insertVideo(lessonContent.videoLecture, videoLeft, videoTop, videoWidth, videoHeight); // This gets the 6th 
     }
     catch (error) {
         Logger.log(`Error inserting video: ${error}`);
-        presentation.getSlides()[5].insertTextBox('Insert video or if not needed, delete this slide.', videoLeft, videoTop, videoWidth, videoHeight);
+        topicSlideVideoOne.insertTextBox('Insert video or if not needed, delete this slide.', videoLeft, videoTop, videoWidth, videoHeight);
         topicSlideVideoOne.setSkipped(true); // Hide the slide if no video provided
     }
     // Insert topic video on the 7th slide
 
     try {
-        let topicVideoElement = topicSlideVideoTwo.insertVideo(lessonContent.videoTopic, videoLeft, videoTop, videoWidth, videoHeight);
+        topicSlideVideoTwo.insertVideo(lessonContent.videoTopic, videoLeft, videoTop, videoWidth, videoHeight);
     } catch (error) {
         Logger.log(`Error inserting topic video: ${error}`);
         topicSlideVideoTwo.insertTextBox('Insert video or if not needed, delete this slide.', videoLeft, videoTop, videoWidth, videoHeight);
@@ -50,8 +49,8 @@ function createActivitySlide(lessonContent: LessonContent) {
                             const placeholder = `{{${key}}}`;
                             let replacement = lessonContent[key];
 
-                            // if the key is 'completion_checklist' or 'key_terms_and_definitions', replace '|' with '\n'
-                            if (key === 'completion_checklist' || key === 'key_terms_and_definitions') {
+                            // if the key is 'completionChecklist' or 'keyTermsAndDefinitions', replace '|' with '\n'
+                            if (key === 'completionChecklist' || key === 'keyTermsAndDefinitions') {
                                 replacement = processText(replacement);
                             }
 
