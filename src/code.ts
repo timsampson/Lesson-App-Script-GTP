@@ -6,7 +6,7 @@ const SHEETSDB: {
     promptDetails: GoogleAppsScript.Spreadsheet.Sheet | null
 } = {
     lessonSequence: LPSpreadsheet.getSheetByName('lesson_sequence'),
-    activityContent: LPSpreadsheet.getSheetByName('activity_content'),
+    activityContent: LPSpreadsheet.getSheetByName('lesson_content'),
     promptDetails: LPSpreadsheet.getSheetByName('prompt_details'),
 };
 
@@ -22,7 +22,7 @@ function onOpen() {
         .addSeparator()
         .addItem('📗 Create Slides', 'createSlides')
         .addSeparator()
-        .addItem('📘 Create Lesson Plans', 'createLessonPlan')
+        .addItem('📘 Create Lesson Plans', 'createLessonPlans')
         .addSeparator()
         .addItem('🤖 Process Lesson Content', 'processLessonContent')
         .addToUi();
@@ -45,7 +45,7 @@ function createSlides() {
 /**
  * Creates slides by calling the createResources function with 'slides' as the argument.
  */
-function generateLessonPlans() {
+function createLessonPlans() {
     createResources('lessonPlans');
 }
 /**
@@ -73,7 +73,7 @@ function createResources(docType: string) {
             createActivitySlide(lessonContent);
         });
     } else if (docType === 'lessonPlans') {
-        const newRecords: LessonContent[] = records.filter(object => object.lessonPlanCreated !== true);
+        const newRecords = records.filter(object => object.lessonPlanCreated !== true);
         newRecords.forEach(lessonContent => {
             createLessonPlan(lessonContent);
         });
@@ -113,7 +113,7 @@ function getAllActivityRecords(): Array<LessonContent> {
     const records: LessonContent[] = arrayOfObj(activityRecords);
 
     // Filter the records where docCreated or slideCreated is not true
-    const newRecords = records.filter(record => !record.activityDocCreated || !record.slideCreated);
+    const newRecords = records.filter(record => !record.activityDocCreated || !record.slideCreated || !record.lessonPlanCreated);
 
     return newRecords;
 }
@@ -125,7 +125,7 @@ function getAllActivityRecords(): Array<LessonContent> {
  * @param {GoogleAppsScript.Spreadsheet.Sheet} tabName - The sheet to update.
  * @param {boolean} cellValue - The value to set in the cell.
  */
-function updateCompleted(rowID: string, colID: string, tabName: GoogleAppsScript.Spreadsheet.Sheet, cellValue: boolean) {
+function updateCompleted(rowID: string, colID: string, tabName: GoogleAppsScript.Spreadsheet.Sheet, cellValue: any) {
     const sheetValues = tabName.getDataRange().getValues();
     const rowNum = sheetValues.findIndex(row => row[0] === rowID);
     const colNum = sheetValues[0].findIndex(col => col === colID);

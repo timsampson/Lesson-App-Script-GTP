@@ -1,4 +1,4 @@
-// id	week	unit	title	period	mainTopic	apObjectives	enduringUnderstanding	suggestedskills	bigIdeaQuiz	previousLessonTopic	nextLessonTopic	summary	processed
+// id	week	unit	title	period	mainTopic	apObjectives	enduringUnderstanding	bigIdeaQuiz	previousLessonTopic	nextLessonTopic	summary	processed
 type LessonSequence = {
     id: string;
     week: string;
@@ -6,23 +6,28 @@ type LessonSequence = {
     title: string;
     period: string;
     mainTopic: string;
+    subTopics: string;
     apObjectives: string;
-    enduringUnderstanding: string;
-    suggestedSkills: string;
     bigIdeaQuiz: string;
     previousLessonTopic: string;
     nextLessonTopic: string;
-    summary: string;
+    lectureVideoTitle: string;
+    videoLecture: string;
+    shortsVideoTitle: string;
+    videoTopic: string;
     processed: boolean;
 };
 
-// id	unit	title	period	mainTopic	introduction	learningObjectiveOne	learningObjectiveTwo	warmUp	keyTermsAndDefinitions	essentialQuestion	trueOrFalseQuestion	endOfLessonQuiz	nextLessonPreview	akEssentialQuestion	akTrueFalse	completionChecklist	lectureVideoTitle	videoLecture	shortsVideoTitle	videoTopic	activityDocCreated	slideCreated	lessonPlanCreated
+//id	unit	title	period	mainTopic	introduction	learningObjectiveOne	learningObjectiveTwo	warmUp	keyTermsAndDefinitions	essentialQuestion	
+// trueOrFalseQuestion	bigIdeaQuiz	nextLessonPreview	akEssentialQuestion	akTrueFalse	completionChecklist	lectureVideoTitle	videoLecture	shortsVideoTitle	
+// videoTopic	activityDocCreated	slideCreated	lessonPlanCreated
 type LessonContent = {
     id: string;
     unit: string;
     title: string;
     period: string;
     mainTopic: string;
+    subTopics: string;
     introduction: string;
     learningObjectiveOne: string;
     learningObjectiveTwo: string;
@@ -30,7 +35,7 @@ type LessonContent = {
     keyTermsAndDefinitions: string;
     essentialQuestion: string;
     trueOrFalseQuestion: string;
-    endOfLessonQuiz: string;
+    bigIdeaQuiz: string;
     nextLessonPreview: string;
     akEssentialQuestion: string;
     akTrueFalse: string;
@@ -39,17 +44,24 @@ type LessonContent = {
     videoLecture: string;
     shortsVideoTitle: string;
     videoTopic: string;
+    model: string;
     activityDocCreated: boolean;
+    activityLink: string;
     slideCreated: boolean;
+    slidesLink: string;
     lessonPlanCreated: boolean;
+    lessonPlanLink: string;
 };
 
+
 type PromptDetailsObj = {
+    model: string;
     modelEndpoint: string,
     promptRole: string,
     promptDetails: string,
     promptFormat: string,
     promptStructure: string
+    apiKey: string
 }
 
 /**
@@ -72,7 +84,6 @@ type PromptDetailsObj = {
  * @property {string} mainTopic - The main topic of the lesson sequence.
  * @property {string} apObjectives - The AP objectives of the lesson sequence.
  * @property {string} enduringUnderstanding - The enduring understanding of the lesson sequence.
- * @property {string} suggestedSkills - The suggested skills of the lesson sequence.
  * @property {string} bigIdeaQuiz - The big idea quiz of the lesson sequence.
  * @property {string} previousLessonTopic - The previous lesson topic.
  * @property {string} nextLessonTopic - The next lesson topic.

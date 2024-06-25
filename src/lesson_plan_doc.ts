@@ -1,15 +1,12 @@
-/**
- * Creates a lesson plan document based on a template and the provided lesson content.
- * 
- * @param {LessonContent} lessonContent - The content for the lesson plan, including placeholders to be replaced.
- */
-function createLessonPlan(lessonContent: LessonContent) {
-    const LessonPlanTemplateID = "1OU-njdY2tVkeBBXyHnduv18JAvFg4CidwpWlUGn9kkA";
-    const lessonPlanTemplate = DriveApp.getFileById(LessonPlanTemplateID);
 
-    let activityFilename = (`U${lessonContent.unit}P${lessonContent.period} Activity Document ${lessonContent.title} ~ ${lessonContent.mainTopic}`);
-    let parentFolder = lessonPlanTemplate.getParents().next();
-    let copy = lessonPlanTemplate.makeCopy(activityFilename, parentFolder);
+function createLessonPlan(documentContent: LessonContent) {
+    const activityTemplateID = "1OU-njdY2tVkeBBXyHnduv18JAvFg4CidwpWlUGn9kkA";
+    const activityTemplate = DriveApp.getFileById(activityTemplateID);
+
+    let activity_filename = (`U${documentContent.unit}P${documentContent.period} Lesson Plan ${documentContent.title} ${documentContent.mainTopic}`);
+    let parentFolder = activityTemplate.getParents().next();
+    let copy = activityTemplate.makeCopy(activity_filename, parentFolder);
+    let documentUrl = copy.getUrl();
     // Get the document by ID
     let document = DocumentApp.openById(copy.getId());
     // Get the body of the document
@@ -17,29 +14,53 @@ function createLessonPlan(lessonContent: LessonContent) {
     let footer = document.getFooter();
     let header = document.getHeader();
     // Replace each placeholder with its corresponding value from the replacements object
-    for (let placeholder in lessonContent) {
-        if (lessonContent.hasOwnProperty(placeholder)) {
-            if (placeholder === 'completionChecklist' || placeholder === 'keyTermsAndDefinitions') {
-                let itemsArray = lessonContent[placeholder].split('|').map(item => {
-                    item = item.trim();
-                    if (item[item.length - 1] !== '.') {
-                        item += '.';
-                    }
-                    return item;
-                });
+    for (let placeholder in documentContent) {
+        if (placeholder === 'completionChecklist') {
+            let arr = documentContent[placeholder].split('|').map(item => {
+                item = item.trim();
+                if (item[item.length - 1] !== '.') {
+                    item += '.';
+                }
+                return item;
+            });
 
-                let tables = body.getTables();
-                let targetCell;
-                // Find the cell containing the placeholder
-                targetCell = updateTable(tables, placeholder, targetCell, itemsArray);
-            } else {
-                body.replaceText('{{' + placeholder + '}}', lessonContent[placeholder]);
+            let tables = body.getTables();
+            let targetCell;
+            // Find the cell containing the placeholder
+            targetCell = updateTable(tables, placeholder, targetCell, arr);
+        } else if (placeholder === 'keyTermsAndDefinitions') {
+            let arr = documentContent[placeholder].split('|').map(item => {
+                item = item.trim();
+                if (item[item.length - 1] !== '.') {
+                    item += '.';
+                }
+                return item;
+            });
+
+            // Find the location of the placeholder in the body
+            var foundElement = body.findText('{{' + placeholder + '}}');
+            if (foundElement) {
+                var foundText = foundElement.getElement().asText();
+                var foundTextIndex = body.getChildIndex(foundText.getParent());
+
+                // Replace the placeholder with the first item in the list
+                foundText.setText(arr[0]);
+
+                // Create the list with the remaining items
+                for (var i = 1; i < arr.length; i++) {
+                    body.insertListItem(foundTextIndex + i, arr[i])
+                        .setGlyphType(DocumentApp.GlyphType.BULLET);
+                }
             }
+        } else {
+            body.replaceText('{{' + placeholder + '}}', documentContent[placeholder]);
         }
     }
-    let footerReplacementText = `U${lessonContent.unit} P${lessonContent.period} ${lessonContent.title} ${lessonContent.mainTopic}`;
+    let footerReplacementText = `U${documentContent.unit}P${documentContent.period} ${documentContent.mainTopic}`;
     footer.replaceText('{{footer}}', footerReplacementText);
-    header.replaceText('{{title}}', activityFilename);
-    Logger.log(`Copied ${activityFilename} with ID: ${copy.getId()}`);
-    updateCompleted(lessonContent.id, 'lessonPlanCreated', SHEETSDB.activityContent, true);
+    header.replaceText('{{title}}', activity_filename);
+    Logger.log(`Copied ${activity_filename} with ID: ${copy.getId()}`);
+    updateCompleted(documentContent.id, 'lessonPlanCreated', SHEETSDB.activityContent, true);
+    updateCompleted(documentContent.id, 'lessonPlanLink', SHEETSDB.activityContent, documentUrl);
+
 }

@@ -1,11 +1,12 @@
 
-function createActivityDocument(document_content: LessonContent) {
+function createActivityDocument(documentContent: LessonContent) {
     const activityTemplateID = "1hIsEy8fWHH1u7vEoTvPT80lqB9jK3Mvk-TERjfQ4G3E";
     const activityTemplate = DriveApp.getFileById(activityTemplateID);
 
-    let activity_filename = (`U${document_content.unit}P${document_content.period} ${document_content.title} ${document_content.mainTopic}`);
+    let activity_filename = (`U${documentContent.unit}P${documentContent.period} Activity Document ${documentContent.title} ${documentContent.mainTopic}`);
     let parentFolder = activityTemplate.getParents().next();
     let copy = activityTemplate.makeCopy(activity_filename, parentFolder);
+    let documentUrl = copy.getUrl();
     // Get the document by ID
     let document = DocumentApp.openById(copy.getId());
     // Get the body of the document
@@ -13,9 +14,9 @@ function createActivityDocument(document_content: LessonContent) {
     let footer = document.getFooter();
     let header = document.getHeader();
     // Replace each placeholder with its corresponding value from the replacements object
-    for (let placeholder in document_content) {
+    for (let placeholder in documentContent) {
         if (placeholder === 'completionChecklist') {
-            let arr = document_content[placeholder].split('|').map(item => {
+            let arr = documentContent[placeholder].split('|').map(item => {
                 item = item.trim();
                 if (item[item.length - 1] !== '.') {
                     item += '.';
@@ -28,7 +29,7 @@ function createActivityDocument(document_content: LessonContent) {
             // Find the cell containing the placeholder
             targetCell = updateTable(tables, placeholder, targetCell, arr);
         } else if (placeholder === 'keyTermsAndDefinitions') {
-            let arr = document_content[placeholder].split('|').map(item => {
+            let arr = documentContent[placeholder].split('|').map(item => {
                 item = item.trim();
                 if (item[item.length - 1] !== '.') {
                     item += '.';
@@ -52,12 +53,14 @@ function createActivityDocument(document_content: LessonContent) {
                 }
             }
         } else {
-            body.replaceText('{{' + placeholder + '}}', document_content[placeholder]);
+            body.replaceText('{{' + placeholder + '}}', documentContent[placeholder]);
         }
     }
-    let footerReplacementText = `U${document_content.unit}P${document_content.period} ${document_content.mainTopic}`;
+    let footerReplacementText = `U${documentContent.unit}P${documentContent.period} ${documentContent.mainTopic}`;
     footer.replaceText('{{footer}}', footerReplacementText);
     header.replaceText('{{title}}', activity_filename);
     Logger.log(`Copied ${activity_filename} with ID: ${copy.getId()}`);
-    updateCompleted(document_content.id, 'activityDocCreated', SHEETSDB.activityContent, true);
+    updateCompleted(documentContent.id, 'activityDocCreated', SHEETSDB.activityContent, true);
+    updateCompleted(documentContent.id, 'activityLink', SHEETSDB.activityContent, documentUrl);
+
 }
