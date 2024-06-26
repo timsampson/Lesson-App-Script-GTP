@@ -102,3 +102,22 @@ This project automates lesson plan creation using Google Apps Script and a Large
 - **Data-Driven:** Relies heavily on Google Sheets for both input and storing generated data.
 - **Scalability:** Designed to process multiple lesson summaries efficiently.
 - **Testability:** TypeScript interfaces make unit testing easier.
+
+## Examples
+
+### Lesson Plan Template and Example
+
+Proof of concept for adding a lesson plan and post lesson reflecting.
+
+[Lesson Plan Template](https://docs.google.com/document/d/1eyVz1VrwvIHqv6CRWf56PwcUg1XbmXDzZhlgbcfXkf4/edit?usp=sharing),
+[U10P3 of 10 Lesson Plan Recursion](https://docs.google.com/document/d/1-pyJRTZp7FwLhk_ygEKZZcdQ_GnEN9vnM4ZzJIguiHA/edit?usp=sharing)
+
+### Activity Document Template and Example
+
+[Activity Document Template](https://docs.google.com/document/d/1G9DnlwYr4ekx7fOeoVswId3N_x-JVr-ZTVFwjg4tFUY/edit?usp=sharing),
+[U10P3 of 10 Activity Document](https://docs.google.com/document/d/1gjNlchRXs_rDoTbufxDFEXRhAm1-j7BWTTo70XCDc2E/edit?usp=sharing)
+
+### Presentation Template and Example
+
+[Presentation Template](https://docs.google.com/presentation/d/1FjXB3vZas58Uo06FwaReWQXlPOvSeSB79dyB1oV--84/edit?usp=sharing),
+[U10P3 of 10 Presentation Recursion](https://docs.google.com/presentation/d/1a0blp7jmfnnM9IKJYIqxxjRaj1QHTwRmqzdMUaI3UNU/edit?usp=sharing)
