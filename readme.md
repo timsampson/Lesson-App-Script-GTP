@@ -4,7 +4,7 @@ LessonBuilder is a Google Apps Script application designed to dramatically reduc
 
 **Here's how LessonBuilder simplifies your workflow:**
 
-1. **Concise Lesson Summaries:** Begin by inputting a brief overview of your lesson into a structured Google Sheet. Include essential details like the unit, topic, learning objectives, key concepts, and relevant AP Computer Science standards.
+1. **Concise Lesson Summaries:** Begin by entering lesson information into a structured Google Sheet. Include essential details like the unit, topic, learning objectives, key concepts, and relevant standards.
 
 2. **AI-Powered Content Creation:** LessonBuilder's intelligent system, powered by a sophisticated LLM, analyzes your input and automatically generates:
 
@@ -31,7 +31,7 @@ LessonBuilder is a Google Apps Script application designed to dramatically reduc
 
 ## Summary by Gemini 1.5 Pro
 
-I uploaded the folder and asked Gemini to analyze the files and provide an overview. I think it is did a reasonable job. Below is it's analysis of the workflow.
+I uploaded the folder and asked Gemini to analyze the files and provide an overview. I think it is did a reasonable job, but it is overselling this application for sure. Below is it's analysis of the workflow.
 
 ## File Breakdown and Data Flow Analysis
 
