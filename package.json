@@ -1,6 +1,6 @@
 {
-  "name": "cs50ap_doc_automation",
-  "version": "0.1.1",
+  "name": "Lesson_doc_automation",
+  "version": "0.1.5",
   "description": "https://docs.google.com/spreadsheets/d/1iCLmdqHSlqqvM0-T_t4e-WotU_Z3V-715EXxMt9cgEQ/edit#gid=1105349385",
   "main": "code.ts",
   "devDependencies": {
