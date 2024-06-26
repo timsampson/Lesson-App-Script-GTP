@@ -1,12 +1,12 @@
-# GAPS and GTP: Automating Lesson Document Creation
+# LessonBuilder, GAPS and GTP: Automating Lesson Document Creation
 
-LessonPrep is a Google Apps Script application designed to dramatically reduce the time and effort required to create high-quality lesson materials. By harnessing the capabilities of advanced Large Language Models (LLMs), LessonPrep automates the generation of comprehensive lesson plans, engaging student activity documents, and visually appealing slide presentations.
+LessonBuilder is a Google Apps Script application designed to dramatically reduce the time and effort required to create high-quality lesson materials. By harnessing the capabilities of advanced Large Language Models (LLMs), LessonBuilder automates the generation of comprehensive lesson plans, engaging student activity documents, and visually appealing slide presentations.
 
-**Here's how LessonPrep simplifies your workflow:**
+**Here's how LessonBuilder simplifies your workflow:**
 
 1. **Concise Lesson Summaries:** Begin by inputting a brief overview of your lesson into a structured Google Sheet. Include essential details like the unit, topic, learning objectives, key concepts, and relevant AP Computer Science standards.
 
-2. **AI-Powered Content Creation:** LessonPrep's intelligent system, powered by a sophisticated LLM, analyzes your input and automatically generates:
+2. **AI-Powered Content Creation:** LessonBuilder's intelligent system, powered by a sophisticated LLM, analyzes your input and automatically generates:
 
    - **Thorough Lesson Plans:** Receive well-organized lesson plans that incorporate timings, warm-up activities, essential questions, key terms, differentiation strategies, assessment ideas, and answer keys.
    - **Engaging Activity Documents:** Provide your students with structured worksheets that include thought-provoking questions, interactive exercises, space for reflection, and clearly defined learning goals.
@@ -27,7 +27,7 @@ LessonPrep is a Google Apps Script application designed to dramatically reduce t
 | ---- | --------- | ------- | ------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | --- |
 | 10   | Recursion | 3 of 10 | 10.2. Recursive Searching and Sorting | "10.2.1. Recursive Binary Search 10.2.2. Merge Sort ..." | "CON-2.P: Apply recursive search algorithms... CON-2.Q: Apply recursive algorithms to sort..." |     |
 
-**LessonPrep takes care of the rest, providing you with fully formed documents, ready for your final review!**
+**LessonBuilder takes care of the rest, providing you with fully formed documents, ready for your final review!**
 
 ## Summary by Gemini 1.5 Pro
 
