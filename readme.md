@@ -121,3 +121,7 @@ Proof of concept for adding a lesson plan and post lesson reflecting.
 
 [Presentation Template](https://docs.google.com/presentation/d/1FjXB3vZas58Uo06FwaReWQXlPOvSeSB79dyB1oV--84/edit?usp=sharing),
 [U10P3 of 10 Presentation Recursion](https://docs.google.com/presentation/d/1a0blp7jmfnnM9IKJYIqxxjRaj1QHTwRmqzdMUaI3UNU/edit?usp=sharing)
+
+### Google Sheet with Apps Script Extention
+
+[Example Java Update Planning Speadsheet 24-25](https://docs.google.com/spreadsheets/d/1dzoSvt7CMHKBi0iRx1f08rasPfUcaBcLwNrPBhy_0-8/edit?usp=sharing)
