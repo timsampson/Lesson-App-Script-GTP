@@ -1,4 +1,4 @@
-# GAPS and GTP: Streamline Lesson Document Creation with the Power of AI
+# GAPS and GTP: Automating Lesson Document Creation
 
 LessonPrep is a Google Apps Script application designed to dramatically reduce the time and effort required to create high-quality lesson materials. By harnessing the capabilities of advanced Large Language Models (LLMs), LessonPrep automates the generation of comprehensive lesson plans, engaging student activity documents, and visually appealing slide presentations.
 
