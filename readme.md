@@ -125,3 +125,5 @@ Proof of concept for adding a lesson plan and post lesson reflecting.
 ### Google Sheet with Apps Script Extention
 
 [Example Java Update Planning Speadsheet 24-25](https://docs.google.com/spreadsheets/d/1dzoSvt7CMHKBi0iRx1f08rasPfUcaBcLwNrPBhy_0-8/edit?usp=sharing)
+
+![Sheets Readme](https://raw.githubusercontent.com/timsampson/lesson_plan_Appsscript_gpt/main/docs/Sheets%20Readme.png "Sheets Readme")
